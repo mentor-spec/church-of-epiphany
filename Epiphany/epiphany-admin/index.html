@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Epiphany — Admin Dashboard</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* :root{ --sidebar:#343a40; --accent:#6c63ff; }
+    body{ font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#f4f6f9; }
+    .sidebar{ width:260px; position:fixed; height:100vh; left:0; top:0; background:var(--sidebar); color:#fff; padding:22px 14px; overflow:auto; }
+    .sidebar .nav-link{ color:#e9ecef; border-radius:8px; padding:10px 12px; }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active{ background:rgba(255,255,255,0.06); color:#fff; }
+    .content{ margin-left:260px; padding:28px; }
+    .card-stats{ border-radius:12px; padding:18px; background:#fff; box-shadow:0 6px 20px rgba(18,38,63,0.06); }
+    .profile-img{ width:42px; height:42px; border-radius:50%; object-fit:cover; }
+    .table-custom{ background:#fff; border-radius:12px; box-shadow:0 6px 20px rgba(18,38,63,0.05); overflow:hidden; }
+    .small-muted{ color:#6c757d; }
+    .sidebar-footer{ position:sticky; bottom:12px; } */
+
+    /* responsive adjustments */
+    /* @media (max-width: 991px){ .sidebar{ left:-280px; transform:translateX(0); transition:all .25s } .sidebar.open{ left:0; } .content{ margin-left:0; } } */
+/* Root variables */
+:root {
+  --sidebar: #343a40;
+  --accent: #6c63ff;
+  --bg-light: #f4f6f9;
+  --transition: all 0.3s ease;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg-light);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* ---------------- SIDEBAR ---------------- */
+.sidebar {
+  width: 260px;
+  position: fixed;
+  height: 100vh;
+  left: 0;
+  top: 0;
+  background: var(--sidebar);
+  color: #fff;
+  padding: 22px 14px;
+  overflow-y: auto;
+  transition: var(--transition);
+  z-index: 1000;
+}
+
+.sidebar .nav-link {
+  color: #e9ecef;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  transition: var(--transition);
+}
+
+.sidebar .nav-link i {
+  min-width: 20px;
+  text-align: center;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.sidebar .profile-img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.sidebar-footer {
+  position: sticky;
+  bottom: 12px;
+  background: var(--sidebar);
+  padding-top: 10px;
+}
+
+/* ---------------- CONTENT AREA ---------------- */
+.content {
+  margin-left: 260px;
+  padding: 28px;
+  transition: var(--transition);
+}
+
+/* Topbar adjustments */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.profile-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ---------------- CARDS ---------------- */
+.card-stats {
+  border-radius: 12px;
+  padding: 18px;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(18, 38, 63, 0.06);
+  transition: var(--transition);
+  text-align: center;
+}
+
+.card-stats:hover {
+  transform: translateY(-3px);
+}
+
+.small-muted {
+  color: #6c757d;
+}
+
+/* ---------------- TABLE STYLING ---------------- */
+.table-custom {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(18, 38, 63, 0.05);
+  overflow: hidden;
+}
+
+.table-custom table {
+  margin-bottom: 0;
+}
+
+.table-custom th {
+  background: #f8f9fa;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.table-custom td {
+  font-size: 0.88rem;
+}
+
+/* ---------------- SIDEBAR TOGGLE FOR MOBILE ---------------- */
+@media (max-width: 991px) {
+  .sidebar {
+    left: -280px;
+    transition: var(--transition);
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  /* Overlay when sidebar is open */
+  body.sidebar-open::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 900;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  /* Adjust topbar spacing */
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+/* ---------------- MOBILE SCREEN OPTIMIZATION ---------------- */
+@media (max-width: 576px) {
+  .card-stats {
+    padding: 14px;
+  }
+
+  .sidebar .nav-link {
+    font-size: 0.9rem;
+    padding: 8px 10px;
+  }
+
+  h3 {
+    font-size: 1.3rem;
+  }
+
+  .table-custom td,
+  .table-custom th {
+    font-size: 0.8rem;
+  }
+
+  /* Buttons and forms */
+  .btn-sm {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Smooth scroll for sidebar */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="d-flex align-items-center mb-3">
+      <img src="./church.jpg" alt="logo" class="profile-img me-2">
+      <div>
+        <strong>Epiphany Admin</strong>
+        <div class="small small-muted">Administrator</div>
+      </div>
+    </div>
+
+    <nav class="nav flex-column mb-3">
+      <a class="nav-link active" data-section="dashboard" href="#"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+      <a class="nav-link" data-section="sermons" href="#"><i class="fas fa-video me-2"></i>Manage Sermons</a>
+      <a class="nav-link" data-section="announcements" href="#"><i class="fas fa-bullhorn me-2"></i>Announcements</a>
+      <a class="nav-link" data-section="livestream" href="#"><i class="fas fa-broadcast-tower me-2"></i>Live Stream</a>
+      <a class="nav-link" data-section="prayers" href="#"><i class="fas fa-praying-hands me-2"></i>Prayer Requests</a>
+      <a class="nav-link" data-section="gallery" href="#"><i class="fas fa-images me-2"></i>Gallery</a>
+      <a class="nav-link" data-section="payments" href="#"><i class="fas fa-hand-holding-dollar me-2"></i>Donations & Payments</a>
+      <a class="nav-link" data-section="users" href="#"><i class="fas fa-users me-2"></i>Users</a>
+      <a class="nav-link" data-section="settings" href="#"><i class="fas fa-cogs me-2"></i>Settings</a>
+      <a class="nav-link text-danger mt-2" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
+    </nav>
+
+    <div class="sidebar-footer small muted mt-4">
+      <div class="mb-2">Quick actions</div>
+      <button class="btn btn-sm btn-light w-100 mb-2" id="btnNewAnnouncement"><i class="fas fa-plus me-2"></i>New Announcement</button>
+      <button class="btn btn-sm btn-outline-light w-100" id="btnNewSermon"><i class="fas fa-upload me-2"></i>Upload Sermon</button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+
+    <!-- TOP BAR -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-outline-secondary d-lg-none" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+        <h4 class="mb-0">Dashboard</h4>
+        <small class="text-muted">Welcome back — here is a snapshot of activity</small>
+      </div>
+
+      <div class="d-flex align-items-center gap-3">
+        <div class="position-relative me-2">
+          <input class="form-control form-control-sm ps-4" id="searchBox" placeholder="Search announcements, sermons, users...">
+          <i class="fas fa-search position-absolute top-50 translate-middle-y ms-2 small-muted"></i>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm" id="btnExportCSV"><i class="fas fa-file-csv me-1"></i>Export CSV</button>
+
+        <div class="dropdown">
+          <a class="d-flex align-items-center text-decoration-none" href="#" data-bs-toggle="dropdown">
+            <img src="./church.jpg" class="profile-img me-2" alt="admin">
+            <div class="text-dark">Admin</div>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="#">Profile</a></li>
+            <li><a class="dropdown-item" href="#">Settings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARDS -->
+    <div id="dashboardSection">
+      <div class="row g-3 mb-4">
+        <div class="col-md-3">
+          <div class="card-stats text-center">
+            <i class="fas fa-video fa-2x" style="color:var(--accent)"></i>
+            <div class="mt-2 small-muted">Total Sermons</div>
+            <h3 id="statSermons">120</h3>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card-stats text-center">
+            <i class="fas fa-bullhorn fa-2x" style="color:#10b981"></i>
+            <div class="mt-2 small-muted">Announcements</div>
+            <h3 id="statAnnouncements">35</h3>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card-stats text-center">
+            <i class="fas fa-praying-hands fa-2x" style="color:#f59e0b"></i>
+            <div class="mt-2 small-muted">Prayer Requests</div>
+            <h3 id="statPrayers">60</h3>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card-stats text-center">
+            <i class="fas fa-users fa-2x" style="color:#ef4444"></i>
+            <div class="mt-2 small-muted">Members</div>
+            <h3 id="statUsers">250</h3>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="card p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">Engagement (Last 7 days)</h6>
+              <div class="small text-muted">Views, Donations, Requests</div>
+            </div>
+            <canvas id="engagementChart" height="120"></canvas>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="card p-3 table-custom" style="height:100%">
+            <h6>Recent Donations</h6>
+            <ul class="list-group list-group-flush mt-2" id="donationList">
+              <!-- sample items -->
+              <li class="list-group-item d-flex justify-content-between align-items-center">Aisha — ₦5,000 <span class="text-muted small">2025-09-23</span></li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">Daniel — ₦2,500 <span class="text-muted small">2025-09-22</span></li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">Grace — ₦10,000 <span class="text-muted small">2025-09-20</span></li>
+            </ul>
+            <div class="mt-3 text-end"><a href="#" class="btn btn-sm btn-outline-primary">View All</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANNOUNCEMENTS SECTION (hidden by default) -->
+    <section id="announcementsSection" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>Manage Announcements</h5>
+        <div>
+          <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#announcementModal">+ New Announcement</button>
+        </div>
+      </div>
+
+      <div class="table-custom p-3">
+        <table class="table align-middle mb-0" id="announcementsTable">
+          <thead>
+            <tr><th>Title</th><th>Category</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Youth Program</td>
+              <td>Event</td>
+              <td>2025-09-23</td>
+              <td><span class="badge bg-success">Active</span></td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary me-1">Edit</button>
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Sunday School Registration</td>
+              <td>Notice</td>
+              <td>2025-09-20</td>
+              <td><span class="badge bg-warning text-dark">Pending</span></td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary me-1">Edit</button>
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PRAYER REQUESTS SECTION -->
+    <section id="prayersSection" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>Prayer Requests</h5>
+        <div><button class="btn btn-sm btn-outline-secondary" id="btnMarkAllRead">Mark All Read</button></div>
+      </div>
+
+      <div class="table-custom p-3">
+        <table class="table mb-0" id="prayersTable">
+          <thead>
+            <tr><th>Name</th><th>Category</th><th>Message</th><th>Date</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>John Doe</td>
+              <td>Healing</td>
+              <td>Pray for my health recovery.</td>
+              <td>2025-09-21</td>
+              <td><button class="btn btn-sm btn-primary" onclick="openPrayerModal('John Doe','Healing','Pray for my health recovery.','2025-09-21')">View</button></td>
+            </tr>
+            <tr>
+              <td>Mary Smith</td>
+              <td>Guidance</td>
+              <td>Seeking direction in my career.</td>
+              <td>2025-09-20</td>
+              <td><button class="btn btn-sm btn-primary" onclick="openPrayerModal('Mary Smith','Guidance','Seeking direction in my career.','2025-09-20')">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SERMONS SECTION -->
+    <section id="sermonsSection" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>Manage Sermons</h5>
+        <div>
+          <input type="file" id="sermonUpload" accept="video/*,audio/*" class="d-none">
+          <button class="btn btn-sm btn-primary" id="uploadSermonBtn">Upload Sermon</button>
+        </div>
+      </div>
+
+      <div class="table-custom p-3">
+        <table class="table mb-0" id="sermonsTable">
+          <thead>
+            <tr><th>Title</th><th>Speaker</th><th>Date</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Grace and Mercy</td>
+              <td>Rev. Basil Ozoemena</td>
+              <td>2025-08-10</td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary me-1">Edit</button>
+                <button class="btn btn-sm btn-outline-danger">Delete</button>
+                <button class="btn btn-sm btn-outline-success">Publish</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- LIVE STREAM SECTION -->
+    <section id="livestreamSection" class="d-none">
+      <div class="mb-3 d-flex justify-content-between align-items-center">
+        <h5>Live Stream Controls</h5>
+        <div>
+          <button class="btn btn-sm btn-danger" id="btnStartLive">Start Live (simulate)</button>
+          <button class="btn btn-sm btn-outline-secondary" id="btnStopLive">Stop</button>
+        </div>
+      </div>
+      <div class="card p-3">
+        <div class="mb-2">Current Live Preview</div>
+        <div class="ratio ratio-16x9 bg-dark rounded overflow-hidden" id="livePreview"> 
+          <div class="d-flex justify-content-center align-items-center h-100 text-light small-muted">No live stream</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GALLERY SECTION -->
+    <section id="gallerySection" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>Gallery Manager</h5>
+        <div>
+          <input type="file" id="galleryUpload" accept="image/*" multiple class="d-none">
+          <button class="btn btn-sm btn-primary" id="uploadGalleryBtn">Upload Images</button>
+        </div>
+      </div>
+
+      <div class="card p-3">
+        <div id="galleryGrid" class="row g-2">
+          <!-- sample images -->
+          <div class="col-6 col-md-3"><img src="./church.jpg" class="img-fluid rounded" alt=""></div>
+          <div class="col-6 col-md-3"><img src="./church.jpg" class="img-fluid rounded" alt=""></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAYMENTS SECTION -->
+    <section id="paymentsSection" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>Donations & Payments</h5>
+        <div><button class="btn btn-sm btn-outline-primary" id="btnSyncPayments">Sync (simulate)</button></div>
+      </div>
+
+      <div class="table-custom p-3">
+        <table class="table mb-0" id="paymentsTable">
+          <thead>
+            <tr><th>Payer</th><th>Amount</th><th>Method</th><th>Date</th><th>Ref</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Aisha</td><td>5000</td><td>Paystack</td><td>2025-09-23</td><td>PSK_12345</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- USERS SECTION -->
+    <section id="usersSection" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5>Users</h5>
+        <div><button class="btn btn-sm btn-primary">Invite Member</button></div>
+      </div>
+      <div class="table-custom p-3">
+        <table class="table mb-0" id="usersTable">
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
+          <tbody>
+            <tr><td>Samuel</td><td>samuel@example.com</td><td>Member</td><td>2024-12-01</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SETTINGS SECTION -->
+    <section id="settingsSection" class="d-none">
+      <div class="card p-3">
+        <h5>Site Settings</h5>
+        <form id="settingsForm" class="row g-3 mt-2">
+          <div class="col-md-6">
+            <label class="form-label">Site Title</label>
+            <input class="form-control" id="siteTitle" value="Anglican Church of Epiphany">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Default Email</label>
+            <input class="form-control" id="siteEmail" value="info@epiphanychurch.org">
+          </div>
+          <div class="col-12 text-end">
+            <button class="btn btn-primary">Save Settings</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODALS -->
+  <div class="modal fade" id="announcementModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <form id="announcementForm">
+          <div class="modal-header">
+            <h5 class="modal-title">New Announcement</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3"><label class="form-label">Title</label><input class="form-control" id="annTitle" required></div>
+            <div class="mb-3"><label class="form-label">Category</label><input class="form-control" id="annCategory"></div>
+            <div class="mb-3"><label class="form-label">Content</label><textarea class="form-control" id="annContent" rows="4"></textarea></div>
+            <div class="mb-3"><label class="form-label">Publish Date</label><input type="date" class="form-control" id="annDate"></div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button class="btn btn-primary" type="submit">Publish Announcement</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="prayerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Prayer Request</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body" id="prayerModalBody"></div>
+        <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Basic single-file simulated admin dashboard enhancements
+    (function(){
+      const sidebar = document.getElementById('sidebar');
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      sidebarToggle?.addEventListener('click', () => sidebar.classList.toggle('open'));
+
+      // Navigation: show/hide sections
+      const sections = {
+        dashboard: document.getElementById('dashboardSection'),
+        announcements: document.getElementById('announcementsSection'),
+        prayers: document.getElementById('prayersSection'),
+        sermons: document.getElementById('sermonsSection'),
+        livestream: document.getElementById('livestreamSection'),
+        gallery: document.getElementById('gallerySection'),
+        payments: document.getElementById('paymentsSection'),
+        users: document.getElementById('usersSection'),
+        settings: document.getElementById('settingsSection')
+      };
+
+      function showSection(key){
+        // hide all
+        Object.values(sections).forEach(s => s && s.classList.add('d-none'));
+        // remove active link
+        document.querySelectorAll('.sidebar .nav-link').forEach(n => n.classList.remove('active'));
+        // show requested
+        const link = document.querySelector('.sidebar .nav-link[data-section="'+key+'"]');
+        if(sections[key]) sections[key].classList.remove('d-none');
+        if(link) link.classList.add('active');
+      }
+
+      document.querySelectorAll('.sidebar .nav-link[data-section]').forEach(link => {
+        link.addEventListener('click', (e)=>{ e.preventDefault(); const s = link.getAttribute('data-section'); showSection(s); });
+      });
+
+      // default
+      showSection('dashboard');
+
+      // Chart sample
+      const ctx = document.getElementById('engagementChart');
+      if(ctx){
+        new Chart(ctx, {
+          type:'line', data:{ labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], datasets:[{ label:'Engagement', data:[120,150,110,180,200,170,220], tension:0.35, fill:true }] }, options:{ responsive:true, plugins:{ legend:{ display:false } } }
+        });
+      }
+
+      // Announcement modal submit (front-end only)
+      document.getElementById('announcementForm')?.addEventListener('submit', function(e){
+        e.preventDefault();
+        const t = document.getElementById('annTitle').value; const c = document.getElementById('annCategory').value; const d = document.getElementById('annDate').value || new Date().toISOString().slice(0,10);
+        // insert into table
+        const tbody = document.querySelector('#announcementsTable tbody');
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${t}</td><td>${c}</td><td>${d}</td><td><span class=\"badge bg-info text-dark\">Draft</span></td><td><button class=\"btn btn-sm btn-outline-primary me-1\">Edit</button><button class=\"btn btn-sm btn-outline-danger\">Delete</button></td>`;
+        tbody.prepend(row);
+        const modal = bootstrap.Modal.getInstance(document.getElementById('announcementModal'));
+        modal.hide();
+      });
+
+      // open prayer modal
+      window.openPrayerModal = function(name, category, message, date){
+        const body = document.getElementById('prayerModalBody');
+        body.innerHTML = `<p><strong>Name:</strong> ${name}</p><p><strong>Category:</strong> ${category}</p><p><strong>Date:</strong> ${date}</p><hr><p>${message}</p>`;
+        new bootstrap.Modal(document.getElementById('prayerModal')).show();
+      }
+
+      // file upload triggers
+      document.getElementById('uploadSermonBtn')?.addEventListener('click', ()=> document.getElementById('sermonUpload').click());
+      document.getElementById('uploadGalleryBtn')?.addEventListener('click', ()=> document.getElementById('galleryUpload').click());
+
+      // gallery upload preview (client-side only)
+      document.getElementById('galleryUpload')?.addEventListener('change', function(e){
+        const grid = document.getElementById('galleryGrid');
+        const files = Array.from(e.target.files).slice(0,12);
+        files.forEach(file=>{
+          const url = URL.createObjectURL(file);
+          const col = document.createElement('div'); col.className='col-6 col-md-3 mb-2';
+          col.innerHTML = `<img src="${url}" class="img-fluid rounded" alt="">`;
+          grid.prepend(col);
+        });
+      });
+
+      // export visible tables to CSV (basic)
+      document.getElementById('btnExportCSV')?.addEventListener('click', function(){
+        const rows = [['Title','Category','Date','Status']];
+        document.querySelectorAll('#announcementsTable tbody tr').forEach(tr=>{
+          const cols = Array.from(tr.children).slice(0,4).map(td=>td.innerText.trim().replace(/\n/g,' ')); rows.push(cols);
+        });
+        const csv = rows.map(r=>r.map(c=>`"${c.replace(/"/g,'""')}"`).join(',')).join('\n');
+        const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv); a.download = 'announcements.csv'; document.body.appendChild(a); a.click(); a.remove();
+      });
+
+      // quick buttons
+      document.getElementById('btnNewAnnouncement')?.addEventListener('click', ()=> new bootstrap.Modal(document.getElementById('announcementModal')).show());
+      document.getElementById('btnNewSermon')?.addEventListener('click', ()=> document.getElementById('sermonUpload').click());
+
+      // simulated live start/stop
+      document.getElementById('btnStartLive')?.addEventListener('click', ()=>{
+        document.getElementById('livePreview').innerHTML = '<iframe class="w-100 h-100" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1" style="border:0;" allowfullscreen></iframe>';
+      });
+      document.getElementById('btnStopLive')?.addEventListener('click', ()=>{
+        document.getElementById('livePreview').innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 text-light small-muted">No live stream</div>';
+      });
+
+      // mark all prayers read (front-end)
+      document.getElementById('btnMarkAllRead')?.addEventListener('click', ()=>{
+        document.querySelectorAll('#prayersTable tbody tr').forEach(tr=> tr.style.opacity = 0.6);
+      });
+
+    })();
+
+
+    
+
+//new
+
+    fetch('/epiphany-admin/api/announcements.php')
+  .then(res => res.json())
+  .then(data => {
+    // populate #announcementsTable tbody
+    console.log(data);
+  });
+
+
+  fetch('/epiphany-admin/api/announcements.php', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ title: 'New', category: 'Notice', content: 'Hello', publish_date: '2025-09-25' })
+})
+.then(r => r.json()).then(res => console.log(res));
+
+
+
+const fd = new FormData();
+fd.append('file', document.getElementById('sermonInput').files[0]);
+fd.append('title', 'Grace and Mercy');
+fd.append('speaker', 'Rev. Basil');
+
+fetch('/epiphany-admin/api/upload.php', { method: 'POST', body: fd })
+  .then(r => r.json()).then(res => console.log(res));
+
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Church Donations | Anglican Church of Epiphany</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <style>
+    body.dark-mode {
+      background-color: #121212;
+      color: #f1f1f1;
+    }
+    .donation-section {
+      padding: 60px 20px;
+      background-color: #f8f9fa;
+    }
+    body.dark-mode .donation-section {
+      background-color: #1c1c1c;
+    }
+    .donation-card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    body.dark-mode .donation-card {
+      background: #2c2c2c;
+      color: #f1f1f1;
+    }
+    .donate-btn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      width: 100%;
+      transition: background 0.3s;
+    }
+    .donate-btn:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <header class="p-3 bg-primary text-white text-center">
+    <h1>Anglican Church of Epiphany Awka</h1>
+    <button class="btn btn-light" onclick="toggleDarkMode()">🌞Toggle Light/🌒Dark Mode</button>
+  </header>
+
+  <main class="container mt-5">
+    <section class="donation-section">
+      <div class="container">
+        <div class="text-center mb-4">
+          <h2>Support Our Ministry</h2>
+          <p>Your donation helps us spread the gospel and serve those in need.</p>
+        </div>
+
+        <div class="row justify-content-center">
+          <div class="col-md-6">
+            <div class="donation-card">
+              <form id="donationForm" onsubmit="payWithPaystack(event)">
+                <div class="mb-3">
+                  <label for="donorName" class="form-label">Full Name</label>
+                  <input type="text" class="form-control" id="donorName" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="donorEmail" class="form-label">Email Address</label>
+                  <input type="email" class="form-control" id="donorEmail" placeholder="Enter your email" required>
+                </div>
+
+                <div class="mb-3">
+                  <label for="amount" class="form-label">Donation Amount (₦)</label>
+                  <input type="number" class="form-control" id="amount" placeholder="e.g. 5000" required>
+                </div>
+
+                <button type="submit" class="donate-btn">Donate Now</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="text-center py-3 bg-dark text-white">
+    <p>&copy; 2025 Anglican Church of Epiphany Awka. All Rights Reserved.</p>
+  </footer>
+
+  <script>
+    // Dark mode toggle
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    // Paystack Payment Integration
+    function payWithPaystack(event) {
+      event.preventDefault();
+
+      let handler = PaystackPop.setup({
+        key: 'pk_test_81ab7beccb202713fbacb2fb0dea8d87022abbba', // Replace with your Paystack Public Key
+        email: document.getElementById('donorEmail').value,
+        amount: document.getElementById('amount').value * 100, // Amount in kobo
+        currency: 'NGN',
+        ref: '' + Math.floor((Math.random() * 1000000000) + 1), // Unique transaction reference
+        metadata: {
+          custom_fields: [
+            {
+              display_name: document.getElementById('donorName').value,
+              variable_name: "donor_name",
+              value: document.getElementById('donorName').value
+            }
+          ]
+        },
+        callback: function(response) {
+          alert('Thank you! Payment complete. Reference: ' + response.reference);
+          // You can redirect to a thank you page
+          window.location.href = 'thank-you.html';
+        },
+        onClose: function() {
+          alert('Donation process canceled.');
+        }
+      });
+      handler.openIframe();
+    }
+  </script>
+</body>
+</html>
+
